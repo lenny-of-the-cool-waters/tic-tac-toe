@@ -12,7 +12,7 @@ let UI = {
     gameAlert: function(message, className) {
         let alertBtn = document.querySelector(".alert-btn");
         alertBtn.textContent = message;
-        alertBtn.classList.add(`btn-${className}`);
+        alertBtn.classList = `btn btn-${className} alert-btn`;
     },
     // Clear all cells
     clearCells: function() {
@@ -30,7 +30,6 @@ function GameBoard() {
     this.boardArray = [...Array(9)];
     this.updateBoard = function(index, icon) {
         this.boardArray[index] = icon;
-        /* console.log(this.boardArray); */
     }
     this.clearBoard = function() {
         this.boardArray = [...Array(9)];
@@ -42,7 +41,7 @@ function Player(name,icon,plays) {
     this.name = name;
     this.icon = icon;
     this.plays = plays;
-    this.start = function() { this.plays = [] };
+    this.start = function() { this.plays = []; };
 }
 
 // Factory function to create single round object
@@ -67,7 +66,7 @@ function GamePlay() {
             UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
         }      
     };
-    //
+    // Check if players have won or drawn
     function checkScore(plays, board) {
         const winConditions = [
             [0,1,2], [3,4,5], [6,7,8],
@@ -93,7 +92,6 @@ function GamePlay() {
     }
     // Controlling what happens when a person plays
     this.play =  function(e) {
-        //Check if game is going on
         if(!ongoing) {
             UI.gameAlert("Game over. Start new game", "danger");            
         } else {
@@ -107,20 +105,16 @@ function GamePlay() {
         }             
     }
     // Restart game
-    /* this.restart = function(){
-        player1.start;
-        player2.start;
+    this.restart = function(){
+        ongoing = true;
+        player1.start();
+        player2.start();
         currentPlayer = player1;
-        (function() {
-            let cells = document.querySelectorAll(".cell");
-            cells.forEach(cell => {
-                console.log("clearing");
-                cell.textContent = ""
-            });
-        })();
+        UI.clearCells();
+        UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
         board.clearBoard;
         console.log("restarting");
-    } */
+    }
 };
 
 /* Events */
@@ -130,5 +124,5 @@ let game = new GamePlay();
 let cells = Array.from(document.querySelectorAll(".cell"));
 cells.forEach(cell => cell.addEventListener("click", game.play))
 // restart game
-/* let restartBtn = document.querySelector(".restart-btn");
-restartBtn.addEventListener("click", ); */
+const restartBtn = document.querySelector(".restart-btn");
+restartBtn.addEventListener("click", game.restart);
