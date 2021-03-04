@@ -1,94 +1,134 @@
 // Object to control UI
 let UI = {
-    // Start game
     // Fill a box
     fillBox: function(cell, icon) { 
         if(!cell.textContent) {
             cell.textContent = icon;
         } else {
-            throw `Cell already filled`;
+            this.gameAlert(`Cell already filled`, "danger");
         }
      },
-    // Alerts for wins or draws
-    alertScore: function(message, className) {
-        const div = document.createElement('div');
-        div.className = `alert alert-${className} text-center`;
-        div.appendChild(document.createTextNode(message));
-        const container = document.querySelector(".container");
-        const board = document.querySelector(".game-container");
-        container.insertBefore(div, board);
-        // Vanish in 3 seconds
-        setTimeout(() => document.querySelector('.alert').remove(), 3000);
+    // Alerts for wins/draws or errors 
+    gameAlert: function(message, className) {
+        let alertBtn = document.querySelector(".alert-btn");
+        alertBtn.textContent = message;
+        alertBtn.classList.add(`btn-${className}`);
+    },
+    // Clear all cells
+    clearCells: function() {
+        let cells = document.querySelectorAll(".cell");
+        cells.forEach(cell => {
+            console.log("clearing");
+            cell.textContent = ""
+        });
     }
 };
 
-// Gameboard object
+// GameBoard constructor
 function GameBoard() {
-    // gameboard array
-    let board = [...Array(9)];
+    /* this.boardArray = [...Array(9)]; */
+    this.boardArray = [...Array(9)];
     this.updateBoard = function(index, icon) {
-        board[index] = icon;
-        console.log(board);
+        this.boardArray[index] = icon;
+        /* console.log(this.boardArray); */
     }
-    this.checkScore = function(plays) {
-        // Check for win
-        const winConditions = [
-            [0,1,2], [3,4,5], [6,7,8],
-            [0,3,6], [1,4,7], [2,5,8],
-            [0,4,8], [2,4,6]
-        ];
-        // Check for draw
-        const fullBoard = (current) => current == "filled";
-        if(GameBoard.board.every(fullBoard)) {
-            UI.alertScore("It's a draw!", "success");
-        } 
+    this.clearBoard = function() {
+        this.boardArray = [...Array(9)];
     }
 };
 
-// Player factory or object
+// Player constructor 
 function Player(name,icon,plays) {
     this.name = name;
     this.icon = icon;
     this.plays = plays;
+    this.start = function() { this.plays = [] };
 }
 
 // Factory function to create single round object
 function GamePlay() {
     // Create players
-    let player1 = new Player("One", "x", []);
-    let player2 = new Player("Two", "o", []);
+    let player1 = new Player("one", "x", []);
+    let player2 = new Player("two", "o", []);
+    let ongoing = true;
     // Create board
     let board = new GameBoard();
     // Current player
     let currentPlayer = player1
+    UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
     // Update current player values
     function updateCurrent(index) {
         currentPlayer.plays.push(index);
     };
     // Change the current player
     function changePlayer() {
-        currentPlayer == player1? currentPlayer = player2 : currentPlayer = player1;        
+        if(ongoing) {
+            currentPlayer == player1? currentPlayer = player2 : currentPlayer = player1;  
+            UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
+        }      
     };
-   
-     // Controlling what happens when a person plays
-     this.play =  function(e) {
-        let cell = e.target;
-        let cellIndex = parseInt(cell.getAttribute("data-cell-index"));
-        UI.fillBox(cell, currentPlayer.icon);
-        board.updateBoard(cellIndex, currentPlayer.icon); 
-        updateCurrent(cellIndex);
-        /* checkScore(currentPlayer.plays); */
-        changePlayer();      
+    //
+    function checkScore(plays, board) {
+        const winConditions = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+        const draw = (current) => current == "x" || current == "o";
+        let success = winConditions.some((winArray) => 
+            winArray.every((val) => 
+                (plays.indexOf(val) !== -1)
+            )
+        )
+
+        if(plays.length >= 3) {
+            if(success) {
+                ongoing = false;
+                return UI.gameAlert(`${currentPlayer.icon} wins`, "success");
+            } else if(board.boardArray.every(draw)) {
+                ongoing = false;
+                return UI.gameAlert("It's a draw!", "success");
+            } 
+        } 
+    }
+    // Controlling what happens when a person plays
+    this.play =  function(e) {
+        //Check if game is going on
+        if(!ongoing) {
+            UI.gameAlert("Game over. Start new game", "danger");            
+        } else {
+            let cell = e.target;
+            let cellIndex = parseInt(cell.getAttribute("data-cell-index"));
+            UI.fillBox(cell, currentPlayer.icon);
+            board.updateBoard(cellIndex, currentPlayer.icon); 
+            updateCurrent(cellIndex);
+            checkScore(currentPlayer.plays, board);
+            changePlayer();
+        }             
     }
     // Restart game
+    /* this.restart = function(){
+        player1.start;
+        player2.start;
+        currentPlayer = player1;
+        (function() {
+            let cells = document.querySelectorAll(".cell");
+            cells.forEach(cell => {
+                console.log("clearing");
+                cell.textContent = ""
+            });
+        })();
+        board.clearBoard;
+        console.log("restarting");
+    } */
 };
 
 /* Events */
 // Start game
-let round = new GamePlay();
+let game = new GamePlay();
 // Clicking a box
 let cells = Array.from(document.querySelectorAll(".cell"));
-cells.forEach(cell => cell.addEventListener("click", round.play))
-
-
-
+cells.forEach(cell => cell.addEventListener("click", game.play))
+// restart game
+/* let restartBtn = document.querySelector(".restart-btn");
+restartBtn.addEventListener("click", ); */
