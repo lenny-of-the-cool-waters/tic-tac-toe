@@ -2,10 +2,11 @@
 let UI = {
     // Fill a box
     fillBox: function(cell, icon) { 
-        if(!cell.textContent) {
-            cell.textContent = icon;
-        } else {
+        if(cell.textContent=="x" || cell.textContent=="o") {
             this.gameAlert(`Cell already filled`, "danger");
+            throw `Cell already filled`;
+        } else {
+            cell.textContent = icon;
         }
      },
     // Alerts for wins/draws or errors 
@@ -54,7 +55,7 @@ function GamePlay() {
     let board = new GameBoard();
     // Current player
     let currentPlayer = player1
-    UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
+    UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "primary");
     // Update current player values
     function updateCurrent(index) {
         currentPlayer.plays.push(index);
@@ -63,7 +64,7 @@ function GamePlay() {
     function changePlayer() {
         if(ongoing) {
             currentPlayer == player1? currentPlayer = player2 : currentPlayer = player1;  
-            UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
+            UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "primary");
         }      
     };
     // Check if players have won or drawn
@@ -111,7 +112,7 @@ function GamePlay() {
         player2.start();
         currentPlayer = player1;
         UI.clearCells();
-        UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "secondary");
+        UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "primary");
         board.clearBoard;
         console.log("restarting");
     }
