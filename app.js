@@ -113,7 +113,7 @@ function GamePlay() {
         currentPlayer = player1;
         UI.clearCells();
         UI.gameAlert(`It is player ${currentPlayer.name}'s turn`, "primary");
-        board.clearBoard;
+        board.clearBoard();
         console.log("restarting");
     }
 };
